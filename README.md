@@ -1,2 +1,1 @@
-# NeuroCare-AI
-An AI-powered healthcare project focused on early detection, monitoring, and support for Alzheimer’s disease using machine learning and smart healthcare technologies.
+NeuroCare-AI is an AI-powered healthcare project focused on neurological health assistance and intelligent patient support. The project aims to provide users with a modern healthcare platform that can help with symptom analysis, patient interaction, and smart healthcare management.

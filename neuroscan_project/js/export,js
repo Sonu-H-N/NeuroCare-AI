@@ -1,0 +1,209 @@
+/* ═══════════════════════════════════════════
+   NeuroScan AI — Export Module
+═══════════════════════════════════════════ */
+
+const Export = {
+
+  generateSummaryText(d, s) {
+    const tier = Utils.tierLabel(s.overall);
+    return `NEUROSCAN AI — ALZHEIMER'S RISK ASSESSMENT REPORT
+${'═'.repeat(58)}
+Generated : ${Utils.fmtDateTime()}
+Patient   : ${d.pname || d.pid}
+Age / Sex : ${d.age} years / ${d.sex}
+Education : ${d.education}
+${'─'.repeat(58)}
+OVERALL RISK SCORE  : ${s.overall}/100  [${tier.toUpperCase()}]
+${'─'.repeat(58)}
+Domain Breakdown:
+  Genetic Risk       : ${Math.round(s.genetic)}/100
+  Lifestyle Risk     : ${Math.round(s.lifestyle)}/100
+  Medical Burden     : ${Math.round(s.medical)}/100
+  Cognitive Signs    : ${Math.round(s.cognitive)}/100
+  Biomarker Index    : ${Math.round(s.biomarker)}/100
+  Screening Score    : ${s.screenScore}/15
+  Age Factor         : ${Math.round(s.ageFactor)}/100
+${'─'.repeat(58)}
+Key Inputs:
+  APOE4 Status       : ${d.apoe4}
+  Family History     : ${d.fhist}
+  Exercise           : ${d.exercise}
+  Diet Pattern       : ${d.diet}
+  Sleep              : ${d.sleep}h per night (${d.sleepQ})
+  Smoking            : ${d.smoking}
+  Stress Level       : ${d.stress}/10
+  Blood Pressure     : ${d.bp}
+  BMI Category       : ${d.bmi}
+  MMSE Score         : ${d.mmse}/30
+  MoCA Score         : ${d.moca}/30
+  MRI Finding        : ${d.mri}
+  PET Result         : ${d.pet}
+  Amyloid CSF        : ${d.amyloid}
+  CSF Tau            : ${d.tau}
+  Conditions         : ${(d.conditions || []).join(', ') || 'None reported'}
+${'─'.repeat(58)}
+Cognitive Symptoms (0–10):
+  Memory lapses      : ${d.s_memory}/10
+  Language           : ${d.s_lang}/10
+  Orientation        : ${d.s_orient}/10
+  Executive Function : ${d.s_exec}/10
+  Mood/Personality   : ${d.s_mood}/10
+  Repetition         : ${d.s_repeat}/10
+  Familiar Tasks     : ${d.s_tasks}/10
+  Visuospatial       : ${d.s_visual}/10
+  Apathy             : ${d.s_apathy}/10
+  Hallucinations     : ${d.s_halluc}/10
+${'═'.repeat(58)}
+DISCLAIMER: This report is for educational and research
+purposes only. It does not constitute medical advice,
+diagnosis, or treatment. Consult a licensed neurologist
+or healthcare professional for clinical evaluation.
+${'═'.repeat(58)}`;
+  },
+
+  toJSON(d, s) {
+    return JSON.stringify({ metadata: { generated: new Date().toISOString(), app: CONFIG.APP_NAME, version: CONFIG.APP_VERSION }, patient: d, scores: s }, null, 2);
+  },
+
+  toCSV(d, s) {
+    const rows = [
+      ['Field', 'Value'],
+      ['Patient', d.pname || d.pid],
+      ['Age', d.age], ['Sex', d.sex], ['Education', d.education],
+      ['Overall Risk', s.overall], ['Genetic', Math.round(s.genetic)],
+      ['Lifestyle', Math.round(s.lifestyle)], ['Medical', Math.round(s.medical)],
+      ['Cognitive', Math.round(s.cognitive)], ['Biomarker', Math.round(s.biomarker)],
+      ['Screening Score', s.screenScore],
+      ['APOE4', d.apoe4], ['Family History', d.fhist],
+      ['Exercise', d.exercise], ['Diet', d.diet],
+      ['Sleep Hours', d.sleep], ['Stress Level', d.stress],
+      ['Smoking', d.smoking], ['Alcohol', d.alcohol],
+      ['Blood Pressure', d.bp], ['BMI', d.bmi],
+      ['MMSE', d.mmse], ['MoCA', d.moca],
+      ['MRI', d.mri], ['PET', d.pet], ['Amyloid CSF', d.amyloid], ['Tau', d.tau],
+      ['Conditions', (d.conditions || []).join('; ')],
+      ['Memory Symptom', d.s_memory], ['Language Symptom', d.s_lang],
+      ['Orientation', d.s_orient], ['Executive', d.s_exec]
+    ];
+    return rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  },
+
+  download(content, filename, type) {
+    const blob = new Blob([content], { type });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  },
+
+  exportJSON(d, s) {
+    this.download(this.toJSON(d, s), `neuroscan_${d.pid || 'report'}.json`, 'application/json');
+    Utils.toast('✅ JSON exported successfully');
+  },
+
+  exportCSV(d, s) {
+    this.download(this.toCSV(d, s), `neuroscan_${d.pid || 'report'}.csv`, 'text/csv');
+    Utils.toast('✅ CSV exported successfully');
+  },
+
+  exportPDF(d, s) {
+    if (!window.jspdf) { Utils.toast('PDF library not loaded'); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const tier = Utils.tierLabel(s.overall);
+    const W = doc.internal.pageSize.getWidth();
+
+    // Header bar
+    doc.setFillColor(43, 86, 127);
+    doc.rect(0, 0, W, 28, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16); doc.setFont('helvetica', 'bold');
+    doc.text('NeuroScan AI', 15, 12);
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+    doc.text('Alzheimer\'s Disease Risk Assessment Report', 15, 20);
+    doc.text(`Generated: ${Utils.fmtDateTime()}`, W - 15, 12, { align: 'right' });
+    doc.text(`v${CONFIG.APP_VERSION}`, W - 15, 20, { align: 'right' });
+
+    // Patient info
+    doc.setTextColor(26, 23, 20);
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+    doc.text('Patient Information', 15, 38);
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+    doc.text(`Name: ${d.pname || 'Anonymous'} | ID: ${d.pid || '—'}`, 15, 46);
+    doc.text(`Age: ${d.age} years | Sex: ${d.sex} | Education: ${d.education}`, 15, 53);
+
+    // Risk score box
+    const riskColor = s.overall < 35 ? [22,112,64] : s.overall < 65 ? [176,108,8] : [176,46,46];
+    doc.setFillColor(...riskColor);
+    doc.roundedRect(15, 60, W - 30, 22, 3, 3, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18); doc.setFont('helvetica', 'bold');
+    doc.text(`Overall Risk Score: ${s.overall}/100`, W / 2, 71, { align: 'center' });
+    doc.setFontSize(11);
+    doc.text(tier.toUpperCase(), W / 2, 79, { align: 'center' });
+
+    // Domain scores
+    doc.setTextColor(26, 23, 20);
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+    doc.text('Domain Scores', 15, 93);
+    const domains = [
+      ['Genetic Risk', Math.round(s.genetic)],
+      ['Lifestyle Risk', Math.round(s.lifestyle)],
+      ['Medical Burden', Math.round(s.medical)],
+      ['Cognitive Signs', Math.round(s.cognitive)],
+      ['Biomarker Index', Math.round(s.biomarker)],
+      ['Screening Score', `${s.screenScore}/15`],
+    ];
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+    const colW = (W - 30) / 3;
+    domains.forEach(([label, val], i) => {
+      const col = i % 3; const row = Math.floor(i / 3);
+      const x = 15 + col * colW; const y = 101 + row * 10;
+      doc.text(`${label}: ${val}${typeof val === 'number' ? '/100' : ''}`, x, y);
+    });
+
+    // Key inputs
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+    doc.text('Key Clinical Inputs', 15, 128);
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+    const inputs = [
+      `APOE4: ${d.apoe4}`, `Family Hx: ${d.fhist}`, `TBI: ${d.tbi}`,
+      `Exercise: ${d.exercise}`, `Diet: ${d.diet}`, `Sleep: ${d.sleep}h (${d.sleepQ})`,
+      `Smoking: ${d.smoking}`, `BP: ${d.bp}`, `BMI: ${d.bmi}`,
+      `MMSE: ${d.mmse}/30`, `MoCA: ${d.moca}/30`, `MRI: ${d.mri}`,
+      `PET: ${d.pet}`, `Amyloid: ${d.amyloid}`, `Tau: ${d.tau}`,
+    ];
+    inputs.forEach((inp, i) => {
+      const col = i % 3; const row = Math.floor(i / 3);
+      doc.text(inp, 15 + col * colW, 136 + row * 8);
+    });
+
+    // Conditions
+    doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+    doc.text('Medical Conditions:', 15, 175);
+    doc.setFont('helvetica', 'normal');
+    doc.text((d.conditions || []).join(', ') || 'None reported', 55, 175);
+
+    // Disclaimer
+    doc.setFillColor(253, 243, 227);
+    doc.rect(10, 250, W - 20, 24, 'F');
+    doc.setTextColor(176, 108, 8);
+    doc.setFontSize(8);
+    doc.text('DISCLAIMER: This report is for educational and research purposes only. It does not constitute medical advice,', 15, 258);
+    doc.text('diagnosis, or treatment. Always consult a licensed neurologist or healthcare professional for clinical evaluation.', 15, 264);
+    doc.text(`Generated by ${CONFIG.APP_NAME} v${CONFIG.APP_VERSION} | Powered by Claude AI (Anthropic)`, 15, 270);
+
+    doc.save(`neuroscan_report_${d.pid || Date.now()}.pdf`);
+    Utils.toast('✅ PDF report downloaded');
+  },
+
+  copySummary(d, s) {
+    const text = this.generateSummaryText(d, s);
+    navigator.clipboard.writeText(text).then(() => Utils.toast('✅ Report copied to clipboard'));
+  },
+
+  printReport() {
+    window.print();
+  }
+};

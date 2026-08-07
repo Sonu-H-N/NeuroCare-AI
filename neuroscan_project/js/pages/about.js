@@ -84,45 +84,41 @@ function renderAboutPage() {
     <div class="card" style="margin-bottom:1.5rem">
       <div class="card-title"><div class="card-num">🚀</div>How to Run the Project</div>
       <div class="ai-content">
-        <p><strong>Option 1 — Instant (No Setup Required):</strong></p>
+        <p><strong>Option 1 — Full app with AI features (recommended):</strong></p>
         <ul>
-          <li>Download the project ZIP and extract it</li>
-          <li>Open <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">index.html</code> directly in any modern browser (Chrome, Firefox, Edge, Safari)</li>
-          <li>All form inputs, local scoring, charts, and export features work immediately — no server needed</li>
-          <li>AI features (clinical summary, chatbot, recommendations) require API configuration (see Option 2)</li>
+          <li>Install <a href="https://nodejs.org" target="_blank" rel="noopener">Node.js</a> 18+</li>
+          <li>In the project folder: <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">npm install</code></li>
+          <li>Copy <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">.env.example</code> to <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">.env</code> and set <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">ANTHROPIC_API_KEY</code></li>
+          <li><code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">npm start</code>, then open <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">http://localhost:3000</code></li>
         </ul>
-        <p><strong>Option 2 — With Full AI Features:</strong></p>
+        <p style="font-size:12px;color:var(--subtle)">The API key stays on the server (<code style="background:var(--bg);padding:1px 5px;border-radius:3px">server.js</code>) — it's never shipped to the browser, unlike pasting a key directly into a static JS file.</p>
+        <p><strong>Option 2 — Scoring only, no AI, no setup:</strong></p>
         <ul>
-          <li>Open <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">js/config.js</code> in a text editor</li>
-          <li>Replace the empty <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">API_KEY: ''</code> value with your Anthropic API key: <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">API_KEY: 'sk-ant-api03-...'</code></li>
-          <li>Open <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">index.html</code> — all AI features will now work</li>
+          <li>Open <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">index.html</code> directly in a browser</li>
+          <li>The assessment wizard, all charts, export (PDF/CSV/JSON), and history work with zero setup</li>
+          <li>The AI Analysis, Action Plan, and Ask AI tabs will show a friendly "unavailable" message instead of AI content</li>
         </ul>
-        <p><strong>Option 3 — Local Web Server (Recommended for Development):</strong></p>
+        <p><strong>Option 3 — Docker:</strong></p>
         <ul>
-          <li>Python: <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">python -m http.server 8080</code> then open <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">http://localhost:8080</code></li>
-          <li>Node.js: <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">npx serve .</code></li>
-          <li>VS Code: Install the "Live Server" extension and click "Go Live"</li>
-        </ul>
-        <p><strong>Option 4 — Deploy Online (Free):</strong></p>
-        <ul>
-          <li>GitHub Pages: Push to a GitHub repo → Settings → Pages → Deploy from main branch</li>
-          <li>Netlify: Drag-and-drop the project folder at <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">netlify.com/drop</code></li>
-          <li>Vercel: <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">npx vercel --prod</code></li>
+          <li><code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">docker build -t neuroscan-ai .</code></li>
+          <li><code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">docker run -p 3000:3000 -e ANTHROPIC_API_KEY=sk-... neuroscan-ai</code></li>
         </ul>
       </div>
     </div>
 
     <div class="card" style="margin-bottom:1.5rem">
       <div class="card-title"><div class="card-num">📁</div>Project File Structure</div>
-      <pre style="font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.8;background:var(--bg);padding:1.25rem;border-radius:8px;overflow-x:auto">neuroscan_project/
+      <pre style="font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.8;background:var(--bg);padding:1.25rem;border-radius:8px;overflow-x:auto">./
 ├── index.html              ← Main entry point
-├── README.md               ← Project documentation
+├── server.js                ← Node/Express static server + Claude API proxy
+├── package.json / .env.example
+├── README.md                ← Project documentation
 ├── css/
 │   ├── main.css            ← Layout, variables, base styles
 │   └── components.css      ← UI components (cards, charts, chatbot)
 ├── js/
-│   ├── config.js           ← API key &amp; app configuration
-│   ├── utils.js            ← Shared utility functions
+│   ├── config.js           ← App configuration (no API key lives here anymore)
+│   ├── utils.js            ← Shared utilities, incl. the /api/claude client
 │   ├── scoring.js          ← Multi-domain risk scoring engine
 │   ├── charts.js           ← Chart.js visualisation manager
 │   ├── chatbot.js          ← AI chatbot module

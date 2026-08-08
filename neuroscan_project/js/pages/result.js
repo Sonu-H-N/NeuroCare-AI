@@ -12,7 +12,7 @@ function renderResultsPage(patientData, scores) {
   <div class="page-inner">
     <div style="text-align:center;margin-bottom:2rem">
       <h2 style="font-family:var(--serif);font-size:2.2rem;margin-bottom:.4rem">Alzheimer's Risk Assessment Report</h2>
-      <p style="font-size:13px;color:var(--muted)" id="resMeta">Generated ${Utils.fmtDateTime()} · Patient: ${d.pname || d.pid} · Age ${d.age}</p>
+      <p style="font-size:13px;color:var(--muted)" id="resMeta">Generated ${Utils.fmtDateTime()} · Patient: ${Utils.escapeHtml(d.pname || d.pid)} · Age ${Utils.escapeHtml(d.age)}</p>
     </div>
 
     <div class="res-tabs" id="resTabs">
@@ -313,7 +313,7 @@ Write 4 detailed paragraphs covering: (1) overall risk impression and tier justi
     if (el) el.innerHTML = r.split('\n\n').filter(Boolean).map(p => `<p>${p}</p>`).join('');
   } catch (e) {
     const el = document.getElementById('aiSummary');
-    if (el) el.innerHTML = `<p style="color:var(--danger)">AI summary unavailable. The computed risk scores reflect evidence-based analysis. Configure your API key in js/config.js for AI analysis. Error: ${e.message}</p>`;
+    if (el) el.innerHTML = `<p style="color:var(--danger)">AI summary unavailable. The computed risk scores below are still evidence-based and valid on their own. To enable AI analysis, make sure the backend server is running with an API key configured (see README). Error: ${Utils.escapeHtml(e.message)}</p>`;
   }
 }
 
@@ -327,7 +327,7 @@ In 3 paragraphs: (1) Current probable clinical stage using NIA-AA ATN framework 
     if (el) el.innerHTML = r.split('\n\n').filter(Boolean).map(p => `<p>${p}</p>`).join('');
   } catch (e) {
     const el = document.getElementById('stagingContent');
-    if (el) el.innerHTML = '<p>Staging analysis unavailable. Please configure API key in js/config.js.</p>';
+    if (el) el.innerHTML = '<p>Staging analysis unavailable. Make sure the backend server is running with an API key configured (see README).</p>';
   }
 }
 
@@ -339,7 +339,7 @@ async function loadAIScience(d, s) {
     if (el) el.innerHTML = r.split('\n\n').filter(Boolean).map(p => `<p>${p}</p>`).join('');
   } catch (e) {
     const el = document.getElementById('scienceContent');
-    if (el) el.innerHTML = '<p>Scientific reference content unavailable. Please configure API key in js/config.js.</p>';
+    if (el) el.innerHTML = '<p>Scientific reference content unavailable. Make sure the backend server is running with an API key configured (see README).</p>';
   }
 }
 
@@ -370,6 +370,6 @@ Include exactly 8 recommendations covering: aerobic exercise, dietary changes, s
     }
   } catch (e) {
     const rg = document.getElementById('recoGrid');
-    if (rg) rg.innerHTML = `<p style="color:var(--muted)">Recommendations unavailable. Configure API key in js/config.js. Error: ${e.message}</p>`;
+    if (rg) rg.innerHTML = `<p style="color:var(--muted)">Recommendations unavailable. Make sure the backend server is running with an API key configured (see README). Error: ${Utils.escapeHtml(e.message)}</p>`;
   }
 }

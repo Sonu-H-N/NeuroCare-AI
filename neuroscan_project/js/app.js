@@ -133,6 +133,19 @@ async function runAnalysis() {
   });
 }
 
+/* ── Optional access code (only relevant if the server has
+   APP_ACCESS_CODE set — see .env.example) ── */
+function promptAccessCode() {
+  const current = Utils.getAccessCode();
+  const next = window.prompt(
+    'Access code (only needed if the person hosting this set one — leave blank to clear):',
+    current
+  );
+  if (next === null) return; // cancelled
+  Utils.setAccessCode(next.trim());
+  Utils.toast(next.trim() ? '✅ Access code saved' : 'Access code cleared');
+}
+
 /* ── Apply saved dark mode preference on load ── */
 (function applyDarkPreference() {
   if (localStorage.getItem('neuroscan_dark') === '1') {

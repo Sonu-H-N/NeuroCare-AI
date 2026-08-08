@@ -581,7 +581,7 @@ function buildReview() {
   if (!el) return;
   el.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem 1.5rem;font-size:13px">
-      <div><span style="color:var(--muted);font-weight:500">Name:</span> ${d.pname || 'Anonymous'}</div>
+      <div><span style="color:var(--muted);font-weight:500">Name:</span> ${Utils.escapeHtml(d.pname || 'Anonymous')}</div>
       <div><span style="color:var(--muted);font-weight:500">Age / Sex:</span> ${d.age} / ${d.sex}</div>
       <div><span style="color:var(--muted);font-weight:500">Education:</span> ${d.education}</div>
       <div><span style="color:var(--muted);font-weight:500">APOE4:</span> ${d.apoe4}</div>

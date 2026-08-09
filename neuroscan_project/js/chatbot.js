@@ -78,19 +78,7 @@ Answer questions specifically about this patient's results. Keep responses conci
         ...this.history
       ];
 
-      const headers = { 'Content-Type': 'application/json' };
-      if (CONFIG.API_KEY) {
-        headers['x-api-key'] = CONFIG.API_KEY;
-        headers['anthropic-version'] = '2023-06-01';
-      }
-
-      const resp = await fetch(CONFIG.API_URL, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ model: CONFIG.MODEL, max_tokens: CONFIG.MAX_TOKENS, messages: allMessages })
-      });
-      const data = await resp.json();
-      const reply = data.content ? data.content.map(i => i.text || '').join('') : 'I apologise — I could not process that. Please check your API configuration.';
+      const reply = await Utils.callClaudeRaw(allMessages);
       this.history.push({ role: 'assistant', content: reply });
 
       document.getElementById(typingId)?.remove();
@@ -98,7 +86,7 @@ Answer questions specifically about this patient's results. Keep responses conci
         <div class="msg">
           <div class="msg-avatar ai">N</div>
           <div>
-            <div class="msg-bubble">${reply.replace(/\n/g, '<br/>')}</div>
+            <div class="msg-bubble">${Utils.escapeHtml(reply).replace(/\n/g, '<br/>')}</div>
             <div class="msg-time">${new Date().toLocaleTimeString()}</div>
           </div>
         </div>`;
@@ -107,14 +95,14 @@ Answer questions specifically about this patient's results. Keep responses conci
       msgs.innerHTML += `
         <div class="msg">
           <div class="msg-avatar ai">N</div>
-          <div><div class="msg-bubble" style="color:var(--danger)">Connection error. Please check API configuration.<br/><small>${e.message}</small></div></div>
+          <div><div class="msg-bubble" style="color:var(--danger)">Connection error — the AI backend may not be running or configured.<br/><small>${Utils.escapeHtml(e.message)}</small></div></div>
         </div>`;
     }
     msgs.scrollTop = msgs.scrollHeight;
   },
 
   escapeHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return Utils.escapeHtml(str);
   }
 };
 

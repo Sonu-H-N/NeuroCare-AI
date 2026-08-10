@@ -1,21 +1,23 @@
 /* ═══════════════════════════════════════════
    NeuroScan AI — Configuration
-   ⚠️  Replace ANTHROPIC_API_KEY with your key
-       or use via Claude.ai where it auto-injects
+   AI calls go through this app's own /api/claude endpoint (see server.js)
+   so the real Anthropic API key stays server-side. Run `npm start` and
+   set ANTHROPIC_API_KEY in .env — see .env.example.
 ═══════════════════════════════════════════ */
 
 const CONFIG = {
   // ── API Settings ──
-  // When running via Claude.ai artifact, the key is handled automatically.
-  // For standalone use: replace with your actual Anthropic API key.
-  API_KEY: '',  // e.g. 'sk-ant-api03-...'
-  API_URL: 'https://api.anthropic.com/v1/messages',
-  MODEL: 'claude-sonnet-4-20250514',
-  MAX_TOKENS: 1000,
+  // Relative path to this app's own backend proxy — NOT api.anthropic.com
+  // directly. See server.js. If you're serving the frontend from a
+  // different origin than the backend, set an absolute URL here instead.
+  API_URL: '/api/claude',
+  // Optional: only needed if you set APP_ACCESS_CODE in the server's .env.
+  // Prompted for once and cached in localStorage (see Utils.getAccessCode).
+  ACCESS_CODE_STORAGE_KEY: 'neuroscan_access_code',
 
   // ── App Settings ──
   APP_NAME: 'NeuroScan AI',
-  APP_VERSION: '2.0',
+  APP_VERSION: '2.1',
   MAX_HISTORY_ENTRIES: 20,
   HISTORY_KEY: 'neuroscan_history_v2',
 

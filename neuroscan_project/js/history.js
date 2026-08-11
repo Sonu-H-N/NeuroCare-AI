@@ -67,18 +67,29 @@ const History = {
             </tr>
           </thead>
           <tbody>
-            ${reversed.map(e => `
+            ${reversed.map((e, i) => {
+              // entries is chronological; reversed[i]'s predecessor is the
+              // next-older entry, i.e. reversed[i + 1]
+              const prev = reversed[i + 1];
+              const delta = prev ? e.overall - prev.overall : null;
+              const deltaHtml = delta === null ? ''
+                : delta === 0 ? ' <span style="color:var(--muted);font-size:11px">(no change)</span>'
+                : delta > 0
+                  ? ` <span style="color:var(--danger);font-size:11px">▲${delta}</span>`
+                  : ` <span style="color:var(--success);font-size:11px">▼${Math.abs(delta)}</span>`;
+              return `
               <tr>
                 <td class="mono">${Utils.fmtDate(e.date)}</td>
-                <td>${e.name}</td>
-                <td>${e.age}</td>
-                <td>${Utils.fmtScore(e.overall)}</td>
+                <td>${Utils.escapeHtml(e.name)}</td>
+                <td>${Utils.escapeHtml(e.age)}</td>
+                <td>${Utils.fmtScore(e.overall)}${deltaHtml}</td>
                 <td>${Utils.fmtScore(e.genetic)}</td>
                 <td>${Utils.fmtScore(e.lifestyle)}</td>
                 <td>${Utils.fmtScore(e.medical)}</td>
                 <td>${Utils.fmtScore(e.cognitive)}</td>
                 <td><span class="pill ${e.overall < 35 ? 'pill-green' : e.overall < 65 ? 'pill-yellow' : 'pill-red'}">${e.tier}</span></td>
-              </tr>`).join('')}
+              </tr>`;
+            }).join('')}
           </tbody>
         </table>
       </div>

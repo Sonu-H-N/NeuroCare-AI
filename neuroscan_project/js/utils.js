@@ -114,23 +114,21 @@ const Utils = {
     });
   },
 
-  /* ── API Call ── */
+  /* ── API Call ──
+     Talks to this app's own backend (server.js), not Anthropic directly —
+     the real API key lives server-side only. */
   async callClaude(prompt, systemPrompt = '') {
     const messages = [{ role: 'user', content: prompt }];
-    const body = {
-      model: CONFIG.MODEL,
-      max_tokens: CONFIG.MAX_TOKENS,
-      messages
-    };
-    if (systemPrompt) {
-      body.system = systemPrompt;
-    }
+    return Utils.callClaudeRaw(messages, systemPrompt);
+  },
+
+  async callClaudeRaw(messages, systemPrompt = '') {
+    const body = { messages };
+    if (systemPrompt) body.system = systemPrompt;
 
     const headers = { 'Content-Type': 'application/json' };
-    if (CONFIG.API_KEY) {
-      headers['x-api-key'] = CONFIG.API_KEY;
-      headers['anthropic-version'] = '2023-06-01';
-    }
+    const code = Utils.getAccessCode();
+    if (code) headers['x-app-key'] = code;
 
     const resp = await fetch(CONFIG.API_URL, {
       method: 'POST',
@@ -139,8 +137,23 @@ const Utils = {
     });
 
     const data = await resp.json();
-    if (data.error) throw new Error(data.error.message || 'API error');
+    if (!resp.ok || data.error) {
+      const msg = (data.error && (data.error.message || data.error)) || `Request failed (${resp.status})`;
+      throw new Error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+    }
     return data.content.map(i => i.text || '').join('');
+  },
+
+  /* ── Optional access code, only relevant if the server has
+     APP_ACCESS_CODE set (see .env.example). Cached in localStorage so the
+     visitor only has to enter it once per browser. ── */
+  getAccessCode() {
+    return localStorage.getItem(CONFIG.ACCESS_CODE_STORAGE_KEY) || '';
+  },
+
+  setAccessCode(code) {
+    if (code) localStorage.setItem(CONFIG.ACCESS_CODE_STORAGE_KEY, code);
+    else localStorage.removeItem(CONFIG.ACCESS_CODE_STORAGE_KEY);
   },
 
   /* ── Safe JSON Parse ── */
@@ -151,6 +164,12 @@ const Utils = {
     } catch {
       return null;
     }
+  },
+
+  /* ── Escape user-entered text before dropping it into innerHTML ── */
+  escapeHtml(str) {
+    return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   },
 
   /* ── Scroll to top ── */

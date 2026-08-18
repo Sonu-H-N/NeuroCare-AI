@@ -1,0 +1,20 @@
+{
+  "name": "neuroscan-ai-server",
+  "version": "1.0.0",
+  "description": "Static file server + secure Claude API proxy for NeuroScan AI. Keeps the Anthropic API key server-side instead of shipping it to the browser.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0"
+  }
+}
